@@ -94,9 +94,20 @@ async def scan_token(
 
 async def _collect_solana(token_data: TokenData, session: aiohttp.ClientSession):
     """Run all Solana API collectors in parallel, merge into token_data."""
-
-    # Check Pump.fun first (synchronous-ish: fast, determines pre-migration path)
-    pump_data = await pumpfun.get_coin_info(token_data.address, session)
+    results = await asyncio.gather(
+        dexscreener.get_token_data(token_data.address, session),
+        rugcheck.get_report(token_data.address, session),
+        helius.get_token_metadata(token_data.address, session),
+        gmgn.get_smart_money(token_data.address, session),
+        gmgn.get_token_info(token_data.address, session),
+        gmgn.get_top_holders(token_data.address, session),
+        insightx.get_overview(token_data.address, "solana", session),
+        pumpfun.get_coin_info(token_data.address, session),
+        return_exceptions=True,
+    )
+    dex_data, rc_data, hel_data, sm_data, gm_info, gm_holders, ix_data, pump_data = [
+        r if not isinstance(r, Exception) else None for r in results
+    ]
 
     if pump_data and pump_data.get("is_pre_migration"):
         token_data.is_pre_migration = True
@@ -105,45 +116,18 @@ async def _collect_solana(token_data: TokenData, session: aiohttp.ClientSession)
             "name", "symbol", "description", "image_url",
             "market_cap_usd:market_cap", "total_supply",
         ])
-        # For pre-migration, run what we can in parallel
-        results = await asyncio.gather(
-            rugcheck.get_report(token_data.address, session),
-            helius.get_token_metadata(token_data.address, session),
-            gmgn.get_smart_money(token_data.address, session),
-            gmgn.get_token_info(token_data.address, session),
-            gmgn.get_top_holders(token_data.address, session),
-            return_exceptions=True,
-        )
-        _merge_solana(token_data, *results)
-    else:
-        # Migrated: run all collectors in parallel
-        results = await asyncio.gather(
-            dexscreener.get_token_data(token_data.address, session),
-            rugcheck.get_report(token_data.address, session),
-            helius.get_token_metadata(token_data.address, session),
-            gmgn.get_smart_money(token_data.address, session),
-            gmgn.get_token_info(token_data.address, session),
-            gmgn.get_top_holders(token_data.address, session),
-            insightx.get_overview(token_data.address, "solana", session),
-            return_exceptions=True,
-        )
-        dex_data, rc_data, hel_data, sm_data, gm_info, gm_holders, ix_data = [
-            r if not isinstance(r, Exception) else None for r in results
-        ]
 
-        # Merge in priority order (higher priority sources override lower)
-        if dex_data:
-            _apply(token_data, dex_data, [
-                "name", "symbol", "price_usd", "market_cap", "fdv",
-                "volume_24h", "liquidity_usd", "age_days", "created_at_ts", "dex_name",
-                "pair_address", "image_url", "website", "twitter", "telegram",
-            ])
+    if dex_data:
+        _apply(token_data, dex_data, [
+            "name", "symbol", "price_usd", "market_cap", "fdv",
+            "volume_24h", "liquidity_usd", "age_days", "created_at_ts", "dex_name",
+            "pair_address", "image_url", "website", "twitter", "telegram",
+        ])
 
-        if pump_data:
-            # Pump.fun fills description/image which DexScreener may lack
-            _apply_if_missing(token_data, pump_data, ["description", "image_url"])
+    if pump_data:
+        _apply_if_missing(token_data, pump_data, ["description", "image_url"])
 
-        _merge_solana(token_data, rc_data, hel_data, sm_data, gm_info, gm_holders, ix_data)
+    _merge_solana(token_data, rc_data, hel_data, sm_data, gm_info, gm_holders, ix_data)
 
 
 def _merge_solana(token_data, rc_data, hel_data, sm_data, gm_info=None, gm_holders=None, ix_data=None):

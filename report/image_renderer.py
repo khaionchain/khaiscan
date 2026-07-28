@@ -194,37 +194,59 @@ def _build_risk_flags(td: TokenData) -> list[str]:
 
 
 # -----------------------------------------------------------------------
-# Playwright renderer
+# Playwright renderer (Persistent Browser Instance)
 # -----------------------------------------------------------------------
 
+_browser = None
+_playwright = None
+_browser_lock = asyncio.Lock()
+
+
+async def _get_browser():
+    global _browser, _playwright
+    async with _browser_lock:
+        if _browser is None or not _browser.is_connected():
+            from playwright.async_api import async_playwright
+            _playwright = await async_playwright().start()
+            _browser = await _playwright.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+            )
+        return _browser
+
+
+async def close_browser():
+    """Cleanup Playwright browser on shutdown."""
+    global _browser, _playwright
+    async with _browser_lock:
+        if _browser:
+            await _browser.close()
+            _browser = None
+        if _playwright:
+            await _playwright.stop()
+            _playwright = None
+
+
 async def _html_to_png(html: str) -> bytes:
-    """Render HTML string to PNG bytes using Playwright."""
-    from playwright.async_api import async_playwright
-
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page(
-            viewport={"width": 800, "height": 800},
-            device_scale_factor=3,  # Ultra HD quality
-        )
-        await page.set_content(html, wait_until="networkidle")
-
-        # Wait a moment for fonts to load
-        await page.wait_for_timeout(500)
-
-        # Get the full page height
+    """Render HTML string to PNG bytes using a persistent Playwright Chromium browser."""
+    browser = await _get_browser()
+    context = await browser.new_context(
+        viewport={"width": 800, "height": 800},
+        device_scale_factor=2,  # Ultra HD quality, fast encode
+    )
+    page = await context.new_page()
+    try:
+        await page.set_content(html, wait_until="domcontentloaded")
         body_height = await page.evaluate("document.body.scrollHeight")
         await page.set_viewport_size({"width": 800, "height": body_height + 20})
-
         png_bytes = await page.screenshot(
             type="png",
             full_page=True,
             omit_background=False,
         )
-
-        await browser.close()
-
-    return png_bytes
+        return png_bytes
+    finally:
+        await context.close()
 
 
 # -----------------------------------------------------------------------

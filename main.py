@@ -23,6 +23,9 @@ logging.basicConfig(
 logger = logging.getLogger("khaiscan")
 
 
+from report.image_renderer import close_browser
+
+
 def _build_bot_and_dispatcher() -> tuple[Bot, Dispatcher]:
     bot = Bot(
         token=config.TELEGRAM_BOT_TOKEN,
@@ -30,6 +33,7 @@ def _build_bot_and_dispatcher() -> tuple[Bot, Dispatcher]:
     )
     dp = Dispatcher()
     dp.include_router(router)
+    dp.shutdown.register(close_browser)
     return bot, dp
 
 

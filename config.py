@@ -37,8 +37,8 @@ WEBHOOK_PATH: str = "/webhook"
 PORT: int = int(os.getenv("PORT", "8080"))
 
 # ── API Timeouts (seconds) ────────────────────────────────────────────
-API_TIMEOUT: int = 8          # Per-API timeout
-SCAN_TOTAL_TIMEOUT: int = 30  # Max scan duration
+API_TIMEOUT: int = 3          # Per-API timeout
+SCAN_TOTAL_TIMEOUT: int = 20  # Max scan duration
 
 # ── Validation ────────────────────────────────────────────────────────
 def validate():
