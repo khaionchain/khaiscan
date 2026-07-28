@@ -47,7 +47,8 @@ def validate():
     if not TELEGRAM_BOT_TOKEN:
         errors.append("TELEGRAM_BOT_TOKEN is not set")
     if not OWNER_ID:
-        errors.append("OWNER_ID is not set")
+        import logging
+        logging.getLogger(__name__).info("OWNER_ID is not set — public access active for all users.")
     # GROQ_API_KEY is optional — lore will be disabled if missing
     if not GROQ_API_KEY:
         import logging

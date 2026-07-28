@@ -44,11 +44,29 @@ router = Router()
 
 
 # ──────────────────────────────────────────────────────────────────────
-# Owner guard
+# Rate Limiter & Access Control
 # ──────────────────────────────────────────────────────────────────────
+import time
+from collections import defaultdict
 
-def _is_owner(message: Message) -> bool:
-    return message.from_user is not None and message.from_user.id == config.OWNER_ID
+_user_scans = defaultdict(list)
+RATE_LIMIT_MAX = 5        # max 5 scans
+RATE_LIMIT_WINDOW = 60    # per 60 seconds
+
+
+def _check_rate_limit(user_id: int) -> bool:
+    """Check if user is under the rate limit. Owner bypasses limit."""
+    if config.OWNER_ID and user_id == config.OWNER_ID:
+        return True
+
+    now = time.time()
+    _user_scans[user_id] = [t for t in _user_scans[user_id] if now - t < RATE_LIMIT_WINDOW]
+
+    if len(_user_scans[user_id]) >= RATE_LIMIT_MAX:
+        return False
+
+    _user_scans[user_id].append(now)
+    return True
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -57,21 +75,22 @@ def _is_owner(message: Message) -> bool:
 
 @router.message(CommandStart())
 async def handle_start(message: Message):
-    if not _is_owner(message):
-        return
     await message.reply(START_MSG, parse_mode="HTML")
 
 
 @router.message(Command("help"))
 async def handle_help(message: Message):
-    if not _is_owner(message):
-        return
     await message.reply(HELP_MSG, parse_mode="HTML")
 
 
 @router.message(Command("scan"))
 async def handle_scan_command(message: Message, bot: Bot):
-    if not _is_owner(message):
+    user_id = message.from_user.id if message.from_user else 0
+    if not _check_rate_limit(user_id):
+        await message.reply(
+            "⏱ <b>Rate limit reached.</b>\n<i>Please wait a minute before scanning another token.</i>",
+            parse_mode="HTML",
+        )
         return
 
     text = message.text or ""
@@ -87,9 +106,14 @@ async def handle_scan_command(message: Message, bot: Bot):
 async def handle_lore_command(message: Message, bot: Bot):
     """
     /lore <address> — AI narrative analysis only.
-    Fetches token identity then runs Gemini lore generation.
+    Fetches token identity then runs AI lore generation.
     """
-    if not _is_owner(message):
+    user_id = message.from_user.id if message.from_user else 0
+    if not _check_rate_limit(user_id):
+        await message.reply(
+            "⏱ <b>Rate limit reached.</b>\n<i>Please wait a minute before scanning another token.</i>",
+            parse_mode="HTML",
+        )
         return
 
     text = message.text or ""
@@ -104,7 +128,7 @@ async def handle_lore_command(message: Message, bot: Bot):
 
     address = parts[1].strip()
     status_msg = await message.reply(
-        "✨ <b>Generating lore analysis…</b>\n<i>Asking Gemini Flash…</i>",
+        "✨ <b>Generating lore analysis…</b>\n<i>Analyzing narrative…</i>",
         parse_mode="HTML",
     )
 
@@ -168,14 +192,19 @@ async def handle_lore_command(message: Message, bot: Bot):
 
 @router.message()
 async def handle_auto_detect(message: Message, bot: Bot):
-    if not _is_owner(message):
-        return
-
     text = message.text or message.caption or ""
     addresses = extract_addresses(text)
 
     if not addresses:
         return  # Not a contract address — ignore silently
+
+    user_id = message.from_user.id if message.from_user else 0
+    if not _check_rate_limit(user_id):
+        await message.reply(
+            "⏱ <b>Rate limit reached.</b>\n<i>Please wait a minute before scanning another token.</i>",
+            parse_mode="HTML",
+        )
+        return
 
     await _run_scan(message, bot, addresses[0])
 
