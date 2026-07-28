@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & Base ───────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #080c16;
+    color: #e0e6f0;
+    width: 800px;
+    padding: 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Design Tokens ─────────────────────────────────────────────── */
+  :root {
+    --bg-deep: #080c16;
+    --bg-card: #111827;
+    --bg-card-inner: #1a2236;
+    --border: #1e2a42;
+    --border-light: #263352;
+    --accent: #00e5ff;
+    --accent-dim: rgba(0, 229, 255, 0.15);
+    --green: #00e676;
+    --yellow: #ffc107;
+    --orange: #ff9800;
+    --red: #f44336;
+    --text-primary: #e8ecf4;
+    --text-secondary: #8892a8;
+    --text-dim: #5a6580;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+  }
+
+  /* ── Card System ───────────────────────────────────────────────── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-title .icon { font-size: 16px; }
+
+  /* ── Header Bar ────────────────────────────────────────────────── */
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 2px;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-logo {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #6c5ce7, #00e5ff);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .header-text h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  .header-text span {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .admin-badge {
+    background: rgba(0, 229, 255, 0.12);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 229, 255, 0.25);
+  }
+
+  .header-time {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* ── Token Identity ────────────────────────────────────────────── */
+  .token-identity {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .token-pfp {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    object-fit: cover;
+    background: var(--bg-card-inner);
+    flex-shrink: 0;
+  }
+
+  .token-pfp-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--border-light);
+    background: linear-gradient(135deg, #1a2236, #263352);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .token-info { flex: 1; min-width: 0; }
+
+  .token-symbol {
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .token-name {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+
+  .token-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    line-height: 1.5;
+  }
+
+  .badge-chain {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
+
+  .badge-age {
+    background: rgba(0, 230, 118, 0.12);
+    color: var(--green);
+    border: 1px solid rgba(0, 230, 118, 0.25);
+  }
+
+  .badge-pre {
+    background: rgba(255, 193, 7, 0.12);
+    color: var(--yellow);
+    border: 1px solid rgba(255, 193, 7, 0.25);
+  }
+
+  .token-address {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+  }
+
+  /* ── Score Panel (right side of identity) ───────────────────────── */
+  .score-panel {
+    text-align: center;
+    flex-shrink: 0;
+    min-width: 140px;
+  }
+
+  .score-verdict-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .score-big {
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .score-big sub {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .score-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+    max-width: 180px;
+  }
+
+  .coverage-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 10px;
+    background: rgba(0, 230, 118, 0.12);
+    color: var(--green);
+    border: 1px solid rgba(0, 230, 118, 0.2);
+  }
+
+  .scanned-by {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── Stats Ribbon ──────────────────────────────────────────────── */
+  .stats-ribbon {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .stat-item {
+    flex: 1;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 6px;
+  }
+
+  .stat-icon { font-size: 16px; margin-bottom: 3px; }
+
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ── Two Column Layout ─────────────────────────────────────────── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Health Overview ───────────────────────────────────────────── */
+  .health-score-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .health-gauge {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+  }
+
+  .health-gauge-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .health-gauge-ring::after {
+    content: '';
+    position: absolute;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--bg-card);
+  }
+
+  .health-gauge-score {
+    font-size: 26px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .health-gauge-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .health-legend {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .health-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Category Rows ─────────────────────────────────────────────── */
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .cat-icon { width: 18px; text-align: center; font-size: 14px; }
+
+  .cat-name {
+    width: 80px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .cat-bar {
+    flex: 1;
+    display: flex;
+    gap: 3px;
+  }
+
+  .cat-bar-block {
+    width: 18px;
+    height: 12px;
+    border-radius: 2px;
+    background: #1a2236;
+  }
+
+  .cat-score {
+    width: 32px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  /* ── Info Rows (key-value) ─────────────────────────────────────── */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(30, 42, 66, 0.5);
+    font-size: 13px;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-key {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .info-val {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* ── Security / Verdict Rows ───────────────────────────────────── */
+  .verdict-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(30, 42, 66, 0.4);
+    font-size: 13px;
+  }
+
+  .verdict-row:last-child { border-bottom: none; }
+
+  .verdict-key { color: var(--text-secondary); }
+
+  .verdict-val {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green { background: var(--green); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-orange { background: var(--orange); }
+  .dot-red { background: var(--red); }
+  .dot-gray { background: #5a6580; }
+
+  /* ── Security Status Bar ───────────────────────────────────────── */
+  .security-status {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .security-good {
+    background: rgba(0, 230, 118, 0.1);
+    color: var(--green);
+    border: 1px solid rgba(0, 230, 118, 0.25);
+  }
+
+  .security-warn {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--yellow);
+    border: 1px solid rgba(255, 193, 7, 0.25);
+  }
+
+  .security-bad {
+    background: rgba(244, 67, 54, 0.1);
+    color: var(--red);
+    border: 1px solid rgba(244, 67, 54, 0.25);
+  }
+
+  /* ── Basic Info Token Image ────────────────────────────────────── */
+  .basic-info-layout {
+    display: flex;
+    gap: 12px;
+  }
+
+  .basic-info-rows { flex: 1; }
+
+  .basic-info-img {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    object-fit: cover;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .basic-info-img-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, #1a2236, #263352);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: 900;
+    color: var(--accent);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* ── Lore Section ──────────────────────────────────────────────── */
+  .lore-quote {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    padding: 10px 14px;
+    background: var(--bg-card-inner);
+    border-radius: var(--radius-xs);
+    border-left: 3px solid var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .lore-metrics {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .lore-metric {
+    flex: 1;
+    min-width: 60px;
+    text-align: center;
+    padding: 6px 4px;
+    background: var(--bg-card-inner);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border);
+  }
+
+  .lore-metric-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+  }
+
+  .lore-metric-val {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .lore-bottom {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .lore-score-box {
+    padding: 6px 12px;
+    background: var(--bg-card-inner);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border);
+  }
+
+  .lore-score-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+  }
+
+  .lore-score-val {
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  .lore-comps {
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+
+  .lore-comp-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--bg-card-inner);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-weight: 600;
+    margin: 0 2px;
+    color: var(--accent);
+    font-size: 10px;
+  }
+
+  /* ── Decision Engine ───────────────────────────────────────────── */
+  .decision-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .decision-score {
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .decision-verdict {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .decision-bar-container {
+    position: relative;
+    height: 10px;
+    background: linear-gradient(to right, var(--red), var(--orange), var(--yellow), var(--green));
+    border-radius: 5px;
+    margin-bottom: 8px;
+  }
+
+  .decision-bar-marker {
+    position: absolute;
+    top: -5px;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    border: 3px solid var(--bg-card);
+    transform: translateX(-50%);
+    box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  }
+
+  .decision-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .decision-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+    padding: 0 1px;
+  }
+
+  /* ── Risk Flags ────────────────────────────────────────────────── */
+  .risk-ok {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(0, 230, 118, 0.06);
+    border-radius: var(--radius-xs);
+    border: 1px solid rgba(0, 230, 118, 0.15);
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  .risk-ok-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 230, 118, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .risk-flag-item {
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Why This Score ────────────────────────────────────────────── */
+  .why-scores {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .why-score-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--bg-card-inner);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .why-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .why-item {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 3px 0 3px 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .why-item::before {
+    content: '·';
+    position: absolute;
+    left: 4px;
+    color: var(--text-dim);
+  }
+
+  /* ── Summary ───────────────────────────────────────────────────── */
+  .summary-verdict {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .summary-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  .summary-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .summary-lore {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--text-dim);
+    padding: 8px 12px;
+    background: var(--bg-card-inner);
+    border-radius: var(--radius-xs);
+    border-left: 2px solid var(--accent);
+    line-height: 1.5;
+  }
+
+  /* ── InsightX Link ─────────────────────────────────────────────── */
+  .insightx-link {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  /* ── Footer ────────────────────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    padding: 14px 0 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+  }
+
+  .footer span { color: var(--accent); font-weight: 600; }
+
+  /* ── Utility ───────────────────────────────────────────────────── */
+  .color-green { color: var(--green); }
+  .color-yellow { color: var(--yellow); }
+  .color-orange { color: var(--orange); }
+  .color-red { color: var(--red); }
+  .color-gray { color: var(--text-dim); }
+  .color-accent { color: var(--accent); }
+
+  .mb-4 { margin-bottom: 4px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mt-4 { margin-top: 4px; }
+  .fw-700 { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- HEADER BAR                                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="header-bar">
+  <div class="header-brand">
+    <div class="header-logo">🔍</div>
+    <div class="header-text">
+      <h1>KhaiScan</h1>
+      <span>AI-Powered Token Intelligence</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="admin-badge">admin</div>
+    <div class="header-time">{{ timestamp }}</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- TOKEN IDENTITY + SCORE                                            -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+  <div class="token-identity" style="padding: 0;">
+    {% if image_url %}
+    <img class="token-pfp" src="{{ image_url }}" alt="token" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="token-pfp-placeholder" style="display:none;">{{ symbol_initial }}</div>
+    {% else %}
+    <div class="token-pfp-placeholder">{{ symbol_initial }}</div>
+    {% endif %}
+    <div class="token-info">
+      <div class="token-symbol">${{ symbol }}</div>
+      <div class="token-name">{{ name }}</div>
+      <div class="token-badges">
+        <span class="badge badge-chain">{{ chain }}</span>
+        <span class="badge badge-age">{{ age }}</span>
+        {% if is_new_token %}
+        <span class="badge badge-pre" style="background:rgba(0,230,118,0.12); color:var(--green); border-color:rgba(0,230,118,0.25);">New!</span>
+        {% endif %}
+        {% if is_pre_migration %}
+        <span class="badge badge-pre">⚡ Pre-Migration</span>
+        {% endif %}
+      </div>
+      <div class="token-address">{{ address }} 📋</div>
+    </div>
+  </div>
+  <div class="score-panel">
+    <div class="score-verdict-label">{{ verdict_emoji }} {{ verdict }} SCORE {{ verdict_emoji }}</div>
+    <div class="score-big {{ score_color_class }}">{{ overall_score }}<sub>/100</sub></div>
+    <div class="score-desc">{{ verdict_desc }}</div>
+    <div class="coverage-badge">Coverage: {{ coverage }}%</div>
+    <div class="scanned-by">SCANNED BY<br>KHAISCAN</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- STATS RIBBON                                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="stats-ribbon">
+  <div class="stat-item">
+    <div class="stat-icon">💰</div>
+    <div class="stat-label">Price</div>
+    <div class="stat-value">{{ price }}</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-icon">📊</div>
+    <div class="stat-label">Market Cap</div>
+    <div class="stat-value">{{ market_cap }}</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-icon">💧</div>
+    <div class="stat-label">Liquidity</div>
+    <div class="stat-value">{{ liquidity }}</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-icon">📈</div>
+    <div class="stat-label">24H Volume</div>
+    <div class="stat-value">{{ volume_24h }}</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-icon">👥</div>
+    <div class="stat-label">Holders</div>
+    <div class="stat-value">{{ holders }}</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- ROW 1: HEALTH OVERVIEW + BASIC INFORMATION                        -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="two-col">
+  <!-- Health Overview -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span> HEALTH OVERVIEW</div>
+
+    <div class="health-score-area">
+      <div class="health-gauge">
+        <div class="health-gauge-ring" style="background: conic-gradient({{ gauge_color }} {{ overall_score }}%, #1a2236 {{ overall_score }}%);">
+          <div class="health-gauge-score">{{ overall_score }}<sub style="font-size:10px; color:var(--text-secondary);">/100</sub></div>
+          <div class="health-gauge-label">DEGEN SCORE</div>
+        </div>
+      </div>
+      <div class="health-legend">
+        <div class="health-legend-item"><div class="legend-dot" style="background:var(--green);"></div> 70+ (Strong)</div>
+        <div class="health-legend-item"><div class="legend-dot" style="background:var(--yellow);"></div> 45-69 (Good)</div>
+        <div class="health-legend-item"><div class="legend-dot" style="background:var(--orange);"></div> 20-44 (Weak)</div>
+        <div class="health-legend-item"><div class="legend-dot" style="background:var(--red);"></div> &lt;20 (Very Weak)</div>
+      </div>
+    </div>
+
+    <!-- Legend percentages -->
+    <div style="display:flex; justify-content:space-around; margin-bottom:10px; font-size:9px; color:var(--text-dim);">
+      <span>{{ pct_strong }}%</span>
+      <span>{{ pct_good }}%</span>
+      <span>{{ pct_weak }}%</span>
+      <span>{{ pct_vweak }}%</span>
+    </div>
+
+    <!-- Category bars -->
+    {% for cat in categories %}
+    <div class="cat-row">
+      <div class="cat-icon">{{ cat.icon }}</div>
+      <div class="cat-name">{{ cat.name }}</div>
+      <div class="cat-bar">
+        {% for block in cat.blocks %}
+        <div class="cat-bar-block" style="background: {{ block.color }};"></div>
+        {% endfor %}
+      </div>
+      <div class="cat-score">{{ cat.score }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Basic Information -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span> BASIC INFORMATION</div>
+    <div class="basic-info-layout">
+      <div class="basic-info-rows">
+        {% for row in basic_info %}
+        <div class="info-row">
+          <span class="info-key">{{ row.key }}</span>
+          <span class="info-val">{{ row.val }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% if image_url %}
+      <img class="basic-info-img" src="{{ image_url }}" alt="token" onerror="this.style.display='none';">
+      {% else %}
+      <div class="basic-info-img-placeholder">{{ symbol_initial }}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- ROW 2: SECURITY + LAUNCH + HOLDERS                                -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="two-col">
+  <!-- Security -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🛡</span> SECURITY</div>
+    {% for v in security_rows %}
+    <div class="verdict-row">
+      <span class="verdict-key">{{ v.key }}</span>
+      <span class="verdict-val">
+        <span class="dot {{ v.dot_class }}"></span>
+        {{ v.label }}
+      </span>
+    </div>
+    {% endfor %}
+    <div class="security-status {{ security_status_class }}">
+      {{ security_status_icon }} SECURITY STATUS: {{ security_status_label }}
+    </div>
+  </div>
+
+  <!-- Right column: Launch + Holders stacked -->
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    <!-- Launch Analysis -->
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-title"><span class="icon">🚀</span> LAUNCH ANALYSIS</div>
+      {% for v in launch_rows %}
+      <div class="verdict-row">
+        <span class="verdict-key">{{ v.key }}</span>
+        <span class="verdict-val">
+          {% if v.value %}<span style="font-weight:700; margin-right:4px;">{{ v.value }}</span>{% endif %}
+          <span class="dot {{ v.dot_class }}"></span>
+          {{ v.label }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Holder Analysis -->
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-title"><span class="icon">👥</span> HOLDER ANALYSIS</div>
+      {% for v in holder_rows %}
+      <div class="verdict-row">
+        <span class="verdict-key">{{ v.key }}</span>
+        <span class="verdict-val">
+          {% if v.value %}<span style="font-weight:700; margin-right:4px;">{{ v.value }}</span>{% endif %}
+          <span class="dot {{ v.dot_class }}"></span>
+          {{ v.label }}
+        </span>
+      </div>
+      {% endfor %}
+      <div class="insightx-link">View on InsightX →</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- ROW 3: DEVELOPER + MARKET + SMART MONEY                           -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="two-col">
+  <!-- Developer -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🧠</span> DEVELOPER ANALYSIS</div>
+    {% for v in dev_rows %}
+    <div class="verdict-row">
+      <span class="verdict-key">{{ v.key }}</span>
+      <span class="verdict-val">
+        {% if v.value %}<span style="font-weight:700; margin-right:4px;">{{ v.value }}</span>{% endif %}
+        <span class="dot {{ v.dot_class }}"></span>
+        {{ v.label }}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Lore -->
+  <div class="card">
+    <div class="card-title"><span class="icon">✨</span> LORE</div>
+    {% if lore %}
+    <div class="lore-quote">"{{ lore.summary }}"</div>
+    <div class="lore-metrics">
+      <div class="lore-metric">
+        <div class="lore-metric-label">Narrative</div>
+        <div class="lore-metric-val {{ lore.narrative_color }}">{{ lore.narrative }}/10</div>
+      </div>
+      <div class="lore-metric">
+        <div class="lore-metric-label">Originality</div>
+        <div class="lore-metric-val {{ lore.originality_color }}">{{ lore.originality }}/10</div>
+      </div>
+      <div class="lore-metric">
+        <div class="lore-metric-label">Virality</div>
+        <div class="lore-metric-val {{ lore.virality_color }}">{{ lore.virality }}/10</div>
+      </div>
+    </div>
+    <div class="lore-bottom">
+      <div class="lore-score-box">
+        <div class="lore-score-label">Lore Score</div>
+        <div class="lore-score-val {{ lore.score_color }}">{{ lore.score }}/100</div>
+      </div>
+      <div class="lore-comps">
+        <span style="color:var(--text-dim);">Comparables</span><br>
+        {% for comp in lore.comps %}
+        <span class="lore-comp-tag">${{ comp }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div style="font-size:11px; color:var(--text-dim); font-style:italic;">Lore analysis unavailable.</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- ROW 4: MARKET + SMART MONEY                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-title"><span class="icon">📉</span> MARKET ACTIVITY</div>
+    {% for v in market_rows %}
+    <div class="verdict-row">
+      <span class="verdict-key">{{ v.key }}</span>
+      <span class="verdict-val">
+        {% if v.value %}<span style="font-weight:700; margin-right:4px;">{{ v.value }}</span>{% endif %}
+        <span class="dot {{ v.dot_class }}"></span>
+        {{ v.label }}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">💎</span> SMART MONEY</div>
+    {% for v in smart_money_rows %}
+    <div class="verdict-row">
+      <span class="verdict-key">{{ v.key }}</span>
+      <span class="verdict-val">
+        {% if v.value %}<span style="font-weight:700; margin-right:4px;">{{ v.value }}</span>{% endif %}
+        <span class="dot {{ v.dot_class }}"></span>
+        {{ v.label }}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- RISK FLAGS                                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-title"><span class="icon">⚠️</span> RISK FLAGS</div>
+    {% if not risk_flags %}
+    <div class="risk-ok">
+      <div class="risk-ok-icon">✅</div>
+      No additional flags detected
+    </div>
+    {% else %}
+    {% for flag in risk_flags %}
+    <div class="risk-flag-item">⚠ {{ flag }}</div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Decision Engine -->
+  <div class="card">
+    <div class="card-title"><span class="icon">⚡</span> DECISION ENGINE 🤖</div>
+    <div class="decision-header">
+      <div>
+        <div class="decision-score {{ score_color_class }}">{{ overall_score }} <span style="font-size:14px; color:var(--text-secondary);">/ 100</span></div>
+        <div class="decision-verdict">-- {{ verdict }} {{ verdict_emoji }}</div>
+      </div>
+    </div>
+    <div class="decision-bar-container">
+      <div class="decision-bar-marker" style="left: {{ overall_score }}%;"></div>
+    </div>
+    <div class="decision-ticks">
+      <span>0</span><span>40</span><span>70</span><span>100</span>
+    </div>
+    <div class="decision-labels">
+      <span>Avoid</span><span>High Risk</span><span>Trade Carefully</span><span>Strong</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- WHY THIS SCORE + SUMMARY                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="two-col">
+  <!-- Why This Score -->
+  <div class="card">
+    <div class="card-title"><span class="icon">❓</span> WHY THIS SCORE?</div>
+    <div class="why-scores">
+      {% for cat in categories %}
+      <div class="why-score-chip">
+        <span>{{ cat.icon }}</span>
+        <span>{{ cat.score }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% if strengths %}
+    <div class="why-section-label">✅ STRENGTHS</div>
+    {% for s in strengths %}
+    <div class="why-item">{{ s }}</div>
+    {% endfor %}
+    {% endif %}
+    {% if risks %}
+    <div class="why-section-label mt-4">⚠️ RISKS</div>
+    {% for r in risks %}
+    <div class="why-item">{{ r }}</div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Summary -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📝</span> SUMMARY</div>
+    <div class="summary-verdict">
+      <span class="summary-emoji">{{ verdict_emoji }}</span>
+      <span class="summary-text">{{ verdict_desc }}</span>
+    </div>
+    {% if lore and lore.summary %}
+    <div class="summary-lore">✨ {{ lore.summary }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FOOTER                                                            -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="footer">
+  <span>KhaiScan</span> · Powered by Gemini Flash
+</div>
+
+</body>
+</html>

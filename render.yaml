@@ -1,0 +1,19 @@
+services:
+  - type: worker
+    name: khaiscan-bot
+    env: docker
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: OWNER_ID
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: GMGN_API_KEY
+        sync: false
+      - key: INSIGHTX_API_KEY
+        sync: false
