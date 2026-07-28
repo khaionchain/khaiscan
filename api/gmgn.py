@@ -81,12 +81,8 @@ async def get_smart_money(address: str, session: aiohttp.ClientSession) -> Optio
     Falls back to the legacy public endpoint if no API key.
     """
     if _has_key():
-        result = await _get_smart_money_openapi(address, session)
-        if result:
-            return result
-
-    # Fallback: legacy public endpoint (may rate-limit)
-    return await _get_smart_money_fallback(address, session)
+        return await _get_smart_money_openapi(address, session)
+    return None
 
 
 async def _get_smart_money_openapi(address: str, session: aiohttp.ClientSession) -> Optional[dict]:

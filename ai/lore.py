@@ -81,7 +81,10 @@ JSON only -- no markdown, no extra text.
 """
 
 
-async def generate_lore(token_data: TokenData) -> LoreResult:
+async def generate_lore(
+    token_data: TokenData,
+    session: Optional[aiohttp.ClientSession] = None,
+) -> LoreResult:
     """
     Generate lore analysis for a token.
 
@@ -110,7 +113,7 @@ async def generate_lore(token_data: TokenData) -> LoreResult:
 
     # 1. Try Groq (primary -- free tier)
     if config.GROQ_API_KEY:
-        result = await _call_groq(prompt)
+        result = await _call_groq(prompt, session)
         if result:
             return result
 
@@ -124,7 +127,10 @@ async def generate_lore(token_data: TokenData) -> LoreResult:
 # Groq backend (primary)
 # -----------------------------------------------------------------------
 
-async def _call_groq(prompt: str) -> Optional[LoreResult]:
+async def _call_groq(
+    prompt: str,
+    session: Optional[aiohttp.ClientSession] = None,
+) -> Optional[LoreResult]:
     """Call Groq OpenAI-compatible API with system + user messages."""
     payload = {
         "model": _GROQ_MODEL,
@@ -141,12 +147,16 @@ async def _call_groq(prompt: str) -> Optional[LoreResult]:
         "Content-Type":  "application/json",
     }
     try:
-        async with aiohttp.ClientSession() as session:
+        own_session = session is None
+        if own_session:
+            session = aiohttp.ClientSession()
+
+        try:
             async with session.post(
                 _GROQ_URL,
                 json=payload,
                 headers=headers,
-                timeout=aiohttp.ClientTimeout(total=20),
+                timeout=aiohttp.ClientTimeout(total=6),
             ) as resp:
                 if resp.status == 401:
                     logger.warning("Groq: invalid API key")
@@ -161,6 +171,10 @@ async def _call_groq(prompt: str) -> Optional[LoreResult]:
                 data = await resp.json()
                 raw  = data["choices"][0]["message"]["content"].strip()
                 return _parse_lore_json(raw, source="Groq")
+        finally:
+            if own_session and session:
+                await session.close()
+
     except Exception as exc:
         logger.warning("Groq lore failed: %s", exc)
         return None

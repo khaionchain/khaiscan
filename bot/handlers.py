@@ -245,22 +245,10 @@ async def _run_scan(message: Message, bot: Bot, address: str):
         for page in pages[1:]:
             await message.reply(page, parse_mode="HTML")
 
-        # 2. Render and send HD image report as follow-up card
-        try:
-            png_bytes = await render_report_image(result)
-            if png_bytes:
-                td = result.token_data
-                symbol = td.symbol or "?"
-                photo = BufferedInputFile(file=png_bytes, filename=f"KhaiScan_{symbol}.png")
-                await bot.send_photo(
-                    chat_id=message.chat.id,
-                    photo=photo,
-                    caption=f"🔍 <b>KhaiScan Card</b> — <b>${symbol}</b>",
-                    parse_mode="HTML",
-                    reply_to_message_id=message.message_id,
-                )
-        except Exception as img_err:
-            logger.warning("Image report render/send failed: %s", img_err)
+        # 2. Fire image rendering as a non-blocking background task
+        asyncio.create_task(
+            _send_image_card_bg(bot, message.chat.id, message.message_id, result)
+        )
 
     except asyncio.TimeoutError:
         await status_msg.edit_text(
@@ -273,6 +261,25 @@ async def _run_scan(message: Message, bot: Bot, address: str):
             ERROR_MSG_TEMPLATE.format(error=str(exc)),
             parse_mode="HTML",
         )
+
+
+async def _send_image_card_bg(bot: Bot, chat_id: int, reply_to_id: int, result: ScanResult):
+    """Background task: render HD PNG image and send as follow-up photo."""
+    try:
+        png_bytes = await render_report_image(result)
+        if png_bytes:
+            td = result.token_data
+            symbol = td.symbol or "?"
+            photo = BufferedInputFile(file=png_bytes, filename=f"KhaiScan_{symbol}.png")
+            await bot.send_photo(
+                chat_id=chat_id,
+                photo=photo,
+                caption=f"🔍 <b>KhaiScan Card</b> — <b>${symbol}</b>",
+                parse_mode="HTML",
+                reply_to_message_id=reply_to_id,
+            )
+    except Exception as img_err:
+        logger.warning("Background image render failed: %s", img_err)
 
 
 async def _try_send_photo(bot: Bot, message: Message, photo_url: str):

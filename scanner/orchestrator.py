@@ -69,7 +69,7 @@ async def scan_token(
         rules_result = apply_rules(token_data)
 
         # ── 6. Generate AI lore ───────────────────────────────────────
-        lore_result = await generate_lore(token_data)
+        lore_result = await generate_lore(token_data, session)
 
         # ── 7. Calculate final score ──────────────────────────────────
         score_result = calculate_score(rules_result, lore_result, token_data)
