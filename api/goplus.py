@@ -95,6 +95,25 @@ async def _evm_security(address: str, chain: str, session: aiohttp.ClientSession
     if not result:
         return None
 
+    holders = result.get("holders") or []
+    top10_pct = None
+    largest_wallet_pct = None
+    if holders:
+        try:
+            pcts = [float(h.get("percent", 0)) * 100 for h in holders if h.get("percent")]
+            if pcts:
+                top10_pct = round(sum(pcts[:10]), 2)
+                largest_wallet_pct = round(pcts[0], 2)
+        except (ValueError, TypeError):
+            pass
+
+    holder_count = None
+    if result.get("holder_count"):
+        try:
+            holder_count = int(result.get("holder_count"))
+        except (ValueError, TypeError):
+            pass
+
     return {
         "is_honeypot":         _flag(result.get("is_honeypot")),
         "mint_disabled":       _flag(result.get("is_mintable")) is False,
@@ -103,8 +122,10 @@ async def _evm_security(address: str, chain: str, session: aiohttp.ClientSession
         "is_proxy":            _flag(result.get("is_proxy")),
         "buy_tax":             _tax(result.get("buy_tax")),
         "sell_tax":            _tax(result.get("sell_tax")),
-        # Extra LP holder data for EVM
         "lp_locked":           _lp_locked(result.get("lp_holders", [])),
+        "top10_pct":           top10_pct,
+        "largest_wallet_pct":  largest_wallet_pct,
+        "holder_count":        holder_count,
     }
 
 

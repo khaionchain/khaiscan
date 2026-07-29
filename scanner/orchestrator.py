@@ -98,6 +98,7 @@ async def _collect_solana(token_data: TokenData, session: aiohttp.ClientSession)
         dexscreener.get_token_data(token_data.address, session),
         rugcheck.get_report(token_data.address, session),
         helius.get_token_metadata(token_data.address, session),
+        helius.get_top_holders(token_data.address, session, total_supply=token_data.total_supply),
         gmgn.get_smart_money(token_data.address, session),
         gmgn.get_token_info(token_data.address, session),
         gmgn.get_top_holders(token_data.address, session),
@@ -105,7 +106,7 @@ async def _collect_solana(token_data: TokenData, session: aiohttp.ClientSession)
         pumpfun.get_coin_info(token_data.address, session),
         return_exceptions=True,
     )
-    dex_data, rc_data, hel_data, sm_data, gm_info, gm_holders, ix_data, pump_data = [
+    dex_data, rc_data, hel_data, hel_holders, sm_data, gm_info, gm_holders, ix_data, pump_data = [
         r if not isinstance(r, Exception) else None for r in results
     ]
 
@@ -127,10 +128,10 @@ async def _collect_solana(token_data: TokenData, session: aiohttp.ClientSession)
     if pump_data:
         _apply_if_missing(token_data, pump_data, ["description", "image_url"])
 
-    _merge_solana(token_data, rc_data, hel_data, sm_data, gm_info, gm_holders, ix_data)
+    _merge_solana(token_data, rc_data, hel_data, hel_holders, sm_data, gm_info, gm_holders, ix_data)
 
 
-def _merge_solana(token_data, rc_data, hel_data, sm_data, gm_info=None, gm_holders=None, ix_data=None):
+def _merge_solana(token_data, rc_data, hel_data, hel_holders=None, sm_data=None, gm_info=None, gm_holders=None, ix_data=None):
     """Merge RugCheck, Helius, GMGN, and InsightX data."""
 
     if rc_data and not isinstance(rc_data, Exception):
@@ -149,6 +150,9 @@ def _merge_solana(token_data, rc_data, hel_data, sm_data, gm_info=None, gm_holde
         # Helius metadata is highest priority for identity fields
         _apply(token_data, hel_data, ["name", "symbol"])
         _apply_if_missing(token_data, hel_data, ["description", "image_url"])
+
+    if hel_holders and not isinstance(hel_holders, Exception):
+        _apply_if_missing(token_data, hel_holders, ["top10_pct", "largest_wallet_pct"])
 
     if sm_data and not isinstance(sm_data, Exception):
         _apply(token_data, sm_data, [
