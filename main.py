@@ -79,21 +79,25 @@ def _run_webhook(bot: Bot, dp: Dispatcher):
 # ──────────────────────────────────────────────────────────────────────
 
 async def _keep_alive_loop():
-    """Ping health check endpoint every 5 minutes to prevent Render Free Tier from spinning down."""
+    """Ping health check endpoint every 2 minutes to prevent Render Free Tier from spinning down."""
     ext_url = os.getenv("RENDER_EXTERNAL_URL")
-    url = f"{ext_url.rstrip('/')}/health" if ext_url else f"http://127.0.0.1:{config.PORT}/health"
+    if not ext_url:
+        logger.warning("RENDER_EXTERNAL_URL not set in environment! Add RENDER_EXTERNAL_URL to Render Environment Variables for external pings.")
+        url = f"http://127.0.0.1:{config.PORT}/health"
+    else:
+        url = f"{ext_url.rstrip('/')}/health"
 
-    await asyncio.sleep(10)  # Wait for web server startup
+    await asyncio.sleep(5)  # Wait for web server startup
     logger.info("Keep-alive self-pinger active for %s", url)
 
     async with aiohttp.ClientSession() as session:
         while True:
             try:
                 async with session.get(url, timeout=10) as resp:
-                    logger.debug("Keep-alive ping to %s status %s", url, resp.status)
+                    logger.info("Keep-alive ping to %s -> HTTP %s", url, resp.status)
             except Exception as err:
-                logger.debug("Keep-alive ping failed: %s", err)
-            await asyncio.sleep(300)  # Ping every 5 minutes (300s)
+                logger.warning("Keep-alive ping to %s failed: %s", url, err)
+            await asyncio.sleep(120)  # Ping every 2 minutes (120s)
 
 
 async def _run_polling(bot: Bot, dp: Dispatcher):
