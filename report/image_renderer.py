@@ -147,20 +147,11 @@ def _build_html(result: ScanResult) -> str:
         "security_status_label": _security_status_label(sr.category_scores.get("security", 50)),
         "security_status_icon": _security_status_icon(sr.category_scores.get("security", 50)),
 
-        # Launch
-        "launch_rows": _build_launch_rows(rr, td),
-
         # Holders
         "holder_rows": _build_holder_rows(rr, td),
 
-        # Developer
-        "dev_rows": _build_dev_rows(rr),
-
         # Market
         "market_rows": _build_market_rows(rr, td),
-
-        # Smart money
-        "smart_money_rows": _build_smart_money_rows(rr, td),
 
         # Lore
         "lore": _build_lore(lr),
@@ -260,9 +251,7 @@ def _build_categories(sr: ScoreResult) -> list[dict]:
         ("Security",  "security",    "🛡"),
         ("Holders",   "holders",     "👥"),
         ("Market",    "market",      "💰"),
-        ("Developer", "developer",   "🧠"),
         ("Lore",      "lore",        "✨"),
-        ("Smart $",   "smart_money", "💎"),
     ]
 
     result = []

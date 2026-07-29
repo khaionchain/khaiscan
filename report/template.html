@@ -1020,13 +1020,13 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- ROW 3: DEVELOPER + MARKET + SMART MONEY                           -->
+<!-- ROW 3: MARKET ACTIVITY + LORE                                     -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <div class="two-col">
-  <!-- Developer -->
+  <!-- Market Activity -->
   <div class="card">
-    <div class="card-title"><span class="icon">🧠</span> DEVELOPER ANALYSIS</div>
-    {% for v in dev_rows %}
+    <div class="card-title"><span class="icon">📉</span> MARKET ACTIVITY</div>
+    {% for v in market_rows %}
     <div class="verdict-row">
       <span class="verdict-key">{{ v.key }}</span>
       <span class="verdict-val">
@@ -1072,39 +1072,6 @@
     {% else %}
     <div style="font-size:11px; color:var(--text-dim); font-style:italic;">Lore analysis unavailable.</div>
     {% endif %}
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- ROW 4: MARKET + SMART MONEY                                       -->
-<!-- ═══════════════════════════════════════════════════════════════════ -->
-<div class="two-col">
-  <div class="card">
-    <div class="card-title"><span class="icon">📉</span> MARKET ACTIVITY</div>
-    {% for v in market_rows %}
-    <div class="verdict-row">
-      <span class="verdict-key">{{ v.key }}</span>
-      <span class="verdict-val">
-        {% if v.value %}<span style="font-weight:700; margin-right:4px;">{{ v.value }}</span>{% endif %}
-        <span class="dot {{ v.dot_class }}"></span>
-        {{ v.label }}
-      </span>
-    </div>
-    {% endfor %}
-  </div>
-
-  <div class="card">
-    <div class="card-title"><span class="icon">💎</span> SMART MONEY</div>
-    {% for v in smart_money_rows %}
-    <div class="verdict-row">
-      <span class="verdict-key">{{ v.key }}</span>
-      <span class="verdict-val">
-        {% if v.value %}<span style="font-weight:700; margin-right:4px;">{{ v.value }}</span>{% endif %}
-        <span class="dot {{ v.dot_class }}"></span>
-        {{ v.label }}
-      </span>
-    </div>
-    {% endfor %}
   </div>
 </div>
 

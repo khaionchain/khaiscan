@@ -44,9 +44,7 @@ def build_report(result: ScanResult) -> list[str]:
         _section_basic_info(td),
         _section_security(rr, td),
         _section_holders(rr, td),
-        _section_developer(rr),
         _section_market(rr, td),
-        _section_smart_money(rr, td),
         _section_lore(lr),
         _section_risk_flags(td),
         _section_decision(sr),
@@ -156,11 +154,8 @@ def _section_health(sr: ScoreResult, rr: RulesResult) -> str:
     rows = [
         ("Security",  "security",    "🛡"),
         ("Holders",   "holders",     "👥"),
-        ("Launch",    "launch",      "🚀"),
         ("Market",    "market",      "💰"),
-        ("Developer", "developer",   "🧠"),
         ("Lore",      "lore",        "✨"),
-        ("Smart $",   "smart_money", "💎"),
     ]
 
     lines = [
@@ -343,30 +338,6 @@ def _section_holders(rr: RulesResult, td: TokenData) -> str:
     return "\n".join(lines)
 
 
-def _section_developer(rr: RulesResult) -> str:
-    lines = [f"\n{_DIV}", "🧠 <b>DEVELOPER ANALYSIS</b>", _DIV]
-    has_content = False
-
-    for key in ["dev_wallet_pct", "dev_sold"]:
-        v = rr.verdicts.get(key)
-        if v:
-            val_str = _fmt_pct(v.value) if key == "dev_wallet_pct" and v.value is not None else ""
-            display = f"<code>{val_str}</code>  {v.emoji} {_esc(v.label)}" if val_str else f"{v.emoji} {_esc(v.label)}"
-            label_map = {
-                "dev_wallet_pct": "Dev Holdings",
-                "dev_sold":       "Dev Sold",
-            }
-            lines.append(f"  {label_map[key]:<22} {display}")
-            has_content = True
-
-    if not has_content:
-        lines.append(
-            "  <i>Dev wallet data requires RugCheck to identify the creator address.</i>"
-        )
-
-    return "\n".join(lines)
-
-
 def _section_market(rr: RulesResult, td: TokenData) -> str:
     lines = [f"\n{_DIV}", "📉 <b>MARKET ACTIVITY</b>", _DIV]
 
@@ -385,33 +356,6 @@ def _section_market(rr: RulesResult, td: TokenData) -> str:
         val_str = f"<code>{lmr:.1%}</code>" if lmr is not None else ""
         display = f"{val_str}  {v.emoji} {_esc(v.label)}" if val_str else f"{v.emoji} {_esc(v.label)}"
         lines.append(f"  {'Liquidity / MC':<22} {display}")
-
-    return "\n".join(lines)
-
-
-def _section_smart_money(rr: RulesResult, td: TokenData) -> str:
-    lines = [f"\n{_DIV}", "💎 <b>SMART MONEY</b>", _DIV]
-    has_content = False
-
-    v = rr.verdicts.get("smart_money_wallet_count")
-    if v:
-        val_str = str(int(v.value)) if v.value is not None else ""
-        display = f"<code>{val_str}</code>  {v.emoji} {_esc(v.label)}" if val_str else f"{v.emoji} {_esc(v.label)}"
-        lines.append(f"  {'Smart Wallets':<22} {display}")
-        has_content = True
-
-    if td.smart_money_net_bias:
-        bias_emoji = {"bullish": "🟢", "bearish": "🔴", "neutral": "🟡"}.get(
-            td.smart_money_net_bias, "⚪"
-        )
-        lines.append(f"  {'Net Bias':<22} {bias_emoji} {td.smart_money_net_bias.title()}")
-        has_content = True
-
-    if not has_content:
-        lines.append(
-            "  <i>Smart money data requires a GMGN API key.</i>\n"
-            "  <i>Get one at gmgn.ai (top-right icon) and add it to .env</i>"
-        )
 
     return "\n".join(lines)
 
