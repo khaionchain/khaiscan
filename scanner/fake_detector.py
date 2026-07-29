@@ -101,7 +101,7 @@ def _check_airdrop(td: TokenData, results: dict):
             return
 
     # Heuristic: tiny market cap but many holders = likely airdropped
-    if holders is not None and mc is not None and mc > 0:
+    if holders is not None and holders > 0 and mc is not None and mc > 0:
         mc_per_holder = mc / holders
         if mc_per_holder < 0.5 and holders > 500:
             results["airdrop_detected"] = True
@@ -142,8 +142,8 @@ def _check_suspicious_buys(td: TokenData, results: dict):
         return
 
     if (insider_count is not None and insider_count > 5 and
-            holders is not None and holders < 200):
-        insider_ratio = insider_count / holders * 100
+            holders is not None and 0 < holders < 200):
+        insider_ratio = (insider_count / holders) * 100
         if insider_ratio > 10:
             results["suspicious_buys_detected"] = True
             results["suspicious_buys_reason"] = (
