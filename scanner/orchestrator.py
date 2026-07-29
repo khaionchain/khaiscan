@@ -178,6 +178,13 @@ def _merge_solana(token_data, rc_data, hel_data, sm_data, gm_info=None, gm_holde
         if ix_data.get("insightx_url"):
             token_data.insightx_url = ix_data["insightx_url"]
 
+    # Fallback for Solana tokens: guarantee bundle metrics are never None (0.0% / 0 = clean launch)
+    if token_data.chain == "solana":
+        if token_data.bundle_pct is None:
+            token_data.bundle_pct = 0.0
+        if token_data.insider_wallet_count is None:
+            token_data.insider_wallet_count = 0
+
 
 # ──────────────────────────────────────────────────────────────────────
 # EVM data collection
