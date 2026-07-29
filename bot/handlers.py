@@ -244,13 +244,13 @@ async def _run_scan(message: Message, bot: Bot, address: str):
         # 1. Build text report & edit status message IMMEDIATELY (<1.2s response time)
         pages = build_report(result)
         try:
-            await status_msg.edit_text(pages[0], parse_mode="HTML")
+            await status_msg.edit_text(pages[0], parse_mode="HTML", disable_web_page_preview=True)
         except Exception as edit_err:
             logger.warning("Failed to edit status message with HTML: %s", edit_err)
             try:
-                await status_msg.edit_text(pages[0], parse_mode=None)
+                await status_msg.edit_text(pages[0], parse_mode=None, disable_web_page_preview=True)
             except Exception:
-                await message.reply(pages[0], parse_mode=None)
+                await message.reply(pages[0], parse_mode=None, disable_web_page_preview=True)
 
         # Send any additional text pages
         for page in pages[1:]:

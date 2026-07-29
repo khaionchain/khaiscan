@@ -114,14 +114,17 @@ async def _run_polling(bot: Bot, dp: Dispatcher):
         await runner.setup()
         site = web.TCPSite(runner, "0.0.0.0", config.PORT)
         await site.start()
-        logger.info("Health check server active on port %s", config.PORT)
-
-        # Launch background keep-alive task to prevent Render 15-minute inactivity sleep
-        asyncio.create_task(_keep_alive_loop())
-    except Exception as exc:
-        logger.warning("Could not start health check server (port %s): %s", config.PORT, exc)
-
-    await dp.start_polling(bot)
+    logger.info("Health check & keep-alive active. Starting bot polling…")
+    while True:
+        try:
+            await bot.delete_webhook(drop_pending_updates=True)
+            await dp.start_polling(bot)
+            break
+        except asyncio.CancelledError:
+            break
+        except Exception as exc:
+            logger.error("Polling connection lost: %s. Reconnecting in 5s…", exc)
+            await asyncio.sleep(5)
 
 
 # ──────────────────────────────────────────────────────────────────────
