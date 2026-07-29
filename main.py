@@ -79,8 +79,23 @@ def _run_webhook(bot: Bot, dp: Dispatcher):
 # ──────────────────────────────────────────────────────────────────────
 
 async def _run_polling(bot: Bot, dp: Dispatcher):
-    logger.info("Starting in polling mode (local dev)…")
+    logger.info("Starting in polling mode (with health server on port %s)…", config.PORT)
     await bot.delete_webhook(drop_pending_updates=True)
+
+    # Start a dummy health-check web server so Render Free Web Service port scan passes
+    try:
+        from aiohttp import web
+        app = web.Application()
+        app.router.add_get("/", lambda r: web.Response(text="KhaiScan bot is live!"))
+        app.router.add_get("/health", lambda r: web.Response(text="OK"))
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "0.0.0.0", config.PORT)
+        await site.start()
+        logger.info("Health check server active on port %s", config.PORT)
+    except Exception as exc:
+        logger.warning("Could not start health check server (port %s): %s", config.PORT, exc)
+
     await dp.start_polling(bot)
 
 
