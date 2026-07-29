@@ -42,6 +42,9 @@ async def get_report(address: str, session: aiohttp.ClientSession) -> Optional[d
         largest_wallet_pct = top_holders[0].get("pct") if top_holders else None
         insider_count = sum(1 for h in top_holders if h.get("insider", False))
 
+    if not insider_count:
+        insider_count = int(data.get("graphInsidersDetected") or 0)
+
     # ── Dev wallet from creator field ──────────────────────────────────
     creator = data.get("creator") or data.get("deployer")
     dev_wallet_pct: Optional[float] = None
@@ -82,6 +85,15 @@ async def get_report(address: str, session: aiohttp.ClientSession) -> Optional[d
                 # Fall back: RugCheck score field (0-10000) scaled
                 raw = risk.get("score") or 0
                 bundle_pct = min(100.0, raw / 100) if raw else None
+
+    # Fallback to insiderNetworks graph if bundle_pct not in risks
+    if bundle_pct is None:
+        insider_networks = data.get("insiderNetworks") or []
+        supply = (token_info.get("supply") or 0)
+        if supply > 0 and insider_networks:
+            insider_tokens = sum(net.get("tokenAmount", 0) for net in insider_networks if isinstance(net, dict))
+            if insider_tokens > 0:
+                bundle_pct = round((insider_tokens / supply) * 100, 2)
 
     # ── Mint / Freeze / Update authority ──────────────────────────────
     mint_disabled   = token_info.get("mintAuthority") is None

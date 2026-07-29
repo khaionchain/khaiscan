@@ -190,14 +190,27 @@ async def get_token_info(address: str, session: aiohttp.ClientSession) -> Option
 
     result["image_url"] = payload.get("logo") or payload.get("image_uri") or payload.get("icon")
 
-    # Bundle ratio (0.0-1.0 -> %)
-    for src in ("bundle_ratio", "bundleRatio"):
-        v = payload.get(src)
-        if v is not None:
-            f = _to_float(v, scale=100)
-            if f:
-                result["bundle_pct"] = f
-            break
+    stat = payload.get("stat") or {}
+    wallet_tags_stat = payload.get("wallet_tags_stat") or {}
+
+    # Bundle ratio / percentage from stat.top_bundler_trader_percentage or root bundle_ratio/bundleRatio
+    bundle_val = (
+        stat.get("top_bundler_trader_percentage")
+        or payload.get("bundle_ratio")
+        or payload.get("bundleRatio")
+    )
+    if bundle_val is not None:
+        f = _to_float(bundle_val, scale=100)
+        if f is not None:
+            result["bundle_pct"] = round(f, 2)
+
+    # Bundler wallet count from wallet_tags_stat
+    bundler_count = wallet_tags_stat.get("bundler_wallets")
+    if bundler_count is not None:
+        try:
+            result["bundle_wallet_count"] = int(bundler_count)
+        except (ValueError, TypeError):
+            pass
 
     return result or None
 
