@@ -446,17 +446,18 @@ def _section_lore(lr: Optional[LoreResult]) -> str:
 
 def _section_risk_flags(td: TokenData) -> str:
     flags = []
-    if td.fake_volume_detected:
-        flags.append(f"🚨 FAKE VOLUME: {td.fake_volume_reason}")
-    if td.airdrop_detected:
-        flags.append(f"🚨 AIRDROP DETECTED: {td.airdrop_reason}")
-    if td.suspicious_buys_detected:
-        flags.append(f"🚨 SUSPICIOUS BUYS: {td.suspicious_buys_reason}")
+    if td.fake_volume_detected and td.fake_volume_reason:
+        flags.append(f"🚨 FAKE VOLUME: {_esc(td.fake_volume_reason)}")
+    if td.airdrop_detected and td.airdrop_reason:
+        flags.append(f"🚨 AIRDROP DETECTED: {_esc(td.airdrop_reason)}")
+    if td.suspicious_buys_detected and td.suspicious_buys_reason:
+        flags.append(f"🚨 SUSPICIOUS BUYS: {_esc(td.suspicious_buys_reason)}")
 
     if td.risk_flags:
         for f in td.risk_flags:
-            if f not in flags:
-                flags.append(f)
+            esc_f = _esc(f)
+            if esc_f not in flags:
+                flags.append(esc_f)
 
     if not flags:
         return (
@@ -466,7 +467,7 @@ def _section_risk_flags(td: TokenData) -> str:
 
     lines = [f"\n{_DIV}", "⚠️ <b>RISK FLAGS & FRAUD</b>", _DIV]
     for flag in flags[:8]:
-        lines.append(f"  · {_esc(flag)}")
+        lines.append(f"  · {flag}")
     return "\n".join(lines)
 
 

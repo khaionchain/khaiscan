@@ -239,11 +239,21 @@ async def _run_scan(message: Message, bot: Bot, address: str):
 
         # 1. Build text report & edit status message IMMEDIATELY (<1.2s response time)
         pages = build_report(result)
-        await status_msg.edit_text(pages[0], parse_mode="HTML")
+        try:
+            await status_msg.edit_text(pages[0], parse_mode="HTML")
+        except Exception as edit_err:
+            logger.warning("Failed to edit status message with HTML: %s", edit_err)
+            try:
+                await status_msg.edit_text(pages[0], parse_mode=None)
+            except Exception:
+                await message.reply(pages[0], parse_mode=None)
 
         # Send any additional text pages
         for page in pages[1:]:
-            await message.reply(page, parse_mode="HTML")
+            try:
+                await message.reply(page, parse_mode="HTML")
+            except Exception:
+                await message.reply(page, parse_mode=None)
 
         # 2. Fire image rendering as a non-blocking background task
         asyncio.create_task(
