@@ -259,7 +259,6 @@ def _build_categories(sr: ScoreResult) -> list[dict]:
     cats = [
         ("Security",  "security",    "🛡"),
         ("Holders",   "holders",     "👥"),
-        ("Launch",    "launch",      "🚀"),
         ("Market",    "market",      "💰"),
         ("Developer", "developer",   "🧠"),
         ("Lore",      "lore",        "✨"),
@@ -406,6 +405,13 @@ def _build_holder_rows(rr: RulesResult, td: TokenData) -> list[dict]:
         val = _fmt_pct(td.largest_wallet_pct)
         rows.append({"key": "Largest Wallet", "value": val or "", "label": v.label, "dot_class": _emoji_to_dot(v.emoji)})
 
+    v = rr.verdicts.get("insider_wallet_count")
+    if v and v.value is not None:
+        val = str(int(v.value))
+        rows.append({"key": "Insider Wallets", "value": val, "label": v.label, "dot_class": _emoji_to_dot(v.emoji)})
+    elif td.insider_wallet_count is not None:
+        rows.append({"key": "Insider Wallets", "value": str(td.insider_wallet_count), "label": "Detected", "dot_class": "dot-yellow"})
+
     v = rr.verdicts.get("lp_locked")
     if v:
         pct = f" ({td.lp_lock_pct:.1f}%)" if td.lp_lock_pct else ""
@@ -419,6 +425,11 @@ def _build_holder_rows(rr: RulesResult, td: TokenData) -> list[dict]:
     if v:
         val = _fmt_pct(td.bundle_pct)
         rows.append({"key": "Bundle Activity", "value": val or "", "label": v.label, "dot_class": _emoji_to_dot(v.emoji)})
+    elif td.bundle_pct is not None:
+        val = _fmt_pct(td.bundle_pct)
+        dot = "dot-green" if td.bundle_pct < 5 else ("dot-yellow" if td.bundle_pct < 15 else "dot-red")
+        label = "Minimal" if td.bundle_pct < 5 else ("Moderate" if td.bundle_pct < 15 else "High bundling")
+        rows.append({"key": "Bundle Activity", "value": val or "", "label": label, "dot_class": dot})
 
     return rows
 

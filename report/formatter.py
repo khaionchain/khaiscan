@@ -43,7 +43,6 @@ def build_report(result: ScanResult) -> list[str]:
         _section_health(sr, rr),
         _section_basic_info(td),
         _section_security(rr, td),
-        _section_launch(rr, td),
         _section_holders(rr, td),
         _section_developer(rr),
         _section_market(rr, td),
@@ -272,40 +271,6 @@ def _section_security(rr: RulesResult, td: TokenData) -> str:
     return "\n".join(lines)
 
 
-def _section_launch(rr: RulesResult, td: TokenData) -> str:
-    lines = [f"\n{_DIV}", "🚀 <b>LAUNCH ANALYSIS</b>", _DIV]
-    has_content = False
-
-    # Bundle
-    v = rr.verdicts.get("bundle_pct")
-    if v:
-        val_str = _fmt_pct(td.bundle_pct)
-        display = f"<code>{val_str}</code>  {v.emoji} {_esc(v.label)}" if val_str else f"{v.emoji} {_esc(v.label)}"
-        lines.append(f"  {'Bundle Activity':<22} {display}")
-        has_content = True
-    elif td.bundle_pct is None:
-        lines.append(f"  {'Bundle Activity':<22} <i>No data from RugCheck</i>")
-        has_content = True
-
-    # Insider wallets
-    v = rr.verdicts.get("insider_wallet_count")
-    if v:
-        val_str = str(int(v.value)) if v.value is not None else ""
-        display = f"<code>{val_str}</code>  {v.emoji} {_esc(v.label)}" if val_str else f"{v.emoji} {_esc(v.label)}"
-        lines.append(f"  {'Insider Wallets':<22} {display}")
-        has_content = True
-
-    # Bonding curve progress
-    if td.is_pre_migration and td.bonding_curve_pct is not None:
-        lines.append(f"  {'Bonding Curve':<22} ⚡ {td.bonding_curve_pct:.1f}% complete")
-        has_content = True
-
-    if not has_content:
-        lines.append("  <i>Launch data unavailable.</i>")
-
-    return "\n".join(lines)
-
-
 def _section_holders(rr: RulesResult, td: TokenData) -> str:
     lines = [f"\n{_DIV}", "👥 <b>HOLDER ANALYSIS</b>", _DIV]
     has_content = False
@@ -326,6 +291,17 @@ def _section_holders(rr: RulesResult, td: TokenData) -> str:
         lines.append(f"  {'Largest Wallet':<22} {display}")
         has_content = True
 
+    # Insider wallets
+    v = rr.verdicts.get("insider_wallet_count")
+    if v:
+        val_str = str(int(v.value)) if v.value is not None else ""
+        display = f"<code>{val_str}</code>  {v.emoji} {_esc(v.label)}" if val_str else f"{v.emoji} {_esc(v.label)}"
+        lines.append(f"  {'Insider Wallets':<22} {display}")
+        has_content = True
+    elif td.insider_wallet_count is not None:
+        lines.append(f"  {'Insider Wallets':<22} <code>{td.insider_wallet_count}</code>")
+        has_content = True
+
     # LP lock
     v = rr.verdicts.get("lp_locked")
     if v:
@@ -338,7 +314,7 @@ def _section_holders(rr: RulesResult, td: TokenData) -> str:
         lines.append(f"  {'LP Lock':<22} {icon}")
         has_content = True
 
-    # Bundle activity (from InsightX or RugCheck)
+    # Bundle activity (from InsightX, GMGN, or RugCheck)
     v = rr.verdicts.get("bundle_pct")
     if v:
         val_str = _fmt_pct(td.bundle_pct)
@@ -347,6 +323,11 @@ def _section_holders(rr: RulesResult, td: TokenData) -> str:
         has_content = True
     elif td.bundle_pct is not None:
         lines.append(f"  {'Bundle Activity':<22} <code>{_fmt_pct(td.bundle_pct)}</code>")
+        has_content = True
+
+    # Bonding curve progress (for Pump.fun pre-migration)
+    if td.is_pre_migration and td.bonding_curve_pct is not None:
+        lines.append(f"  {'Bonding Curve':<22} ⚡ {td.bonding_curve_pct:.1f}% complete")
         has_content = True
 
     # InsightX link
