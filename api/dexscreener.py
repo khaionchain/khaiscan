@@ -26,7 +26,10 @@ async def get_token_data(address: str, session: aiohttp.ClientSession) -> Option
     """
     data = await safe_get(session, f"{_BASE}/{address}", label="DexScreener")
     if not data or not data.get("pairs"):
-        return None
+        # Fallback: try searching by pair address or query
+        data = await safe_get(session, f"https://api.dexscreener.com/latest/dex/search?q={address}", label="DexScreener/Search")
+        if not data or not data.get("pairs"):
+            return None
 
     # Pick the pair with the highest USD liquidity
     pairs = [p for p in data["pairs"] if p.get("liquidity", {}).get("usd", 0) > 0]

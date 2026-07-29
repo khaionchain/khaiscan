@@ -193,19 +193,23 @@ async def handle_lore_command(message: Message, bot: Bot):
 @router.message()
 async def handle_auto_detect(message: Message, bot: Bot):
     text = message.text or message.caption or ""
-    addresses = extract_addresses(text)
+    user_id = message.from_user.id if message.from_user else 0
+    logger.info("Received Telegram message from user %s: %r", user_id, text)
 
+    addresses = extract_addresses(text)
     if not addresses:
+        logger.info("No valid Solana/EVM contract address found in message: %r", text)
         return  # Not a contract address — ignore silently
 
-    user_id = message.from_user.id if message.from_user else 0
     if not _check_rate_limit(user_id):
+        logger.warning("User %s hit rate limit", user_id)
         await message.reply(
             "⏱ <b>Rate limit reached.</b>\n<i>Please wait a minute before scanning another token.</i>",
             parse_mode="HTML",
         )
         return
 
+    logger.info("Starting scan for address %s extracted from user %s", addresses[0], user_id)
     await _run_scan(message, bot, addresses[0])
 
 
