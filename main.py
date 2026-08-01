@@ -104,7 +104,6 @@ async def _run_polling(bot: Bot, dp: Dispatcher):
     logger.info("Starting in polling mode (with health server on port %s)…", config.PORT)
     await bot.delete_webhook(drop_pending_updates=True)
 
-    # Start a dummy health-check web server so Render Free Web Service port scan passes
     try:
         from aiohttp import web
         app = web.Application()
@@ -114,6 +113,13 @@ async def _run_polling(bot: Bot, dp: Dispatcher):
         await runner.setup()
         site = web.TCPSite(runner, "0.0.0.0", config.PORT)
         await site.start()
+        logger.info("Health check server active on port %s", config.PORT)
+
+        # Launch background keep-alive task
+        asyncio.create_task(_keep_alive_loop())
+    except Exception as exc:
+        logger.warning("Could not start health check server (port %s): %s", config.PORT, exc)
+
     logger.info("Health check & keep-alive active. Starting bot polling…")
     while True:
         try:
